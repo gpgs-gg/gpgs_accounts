@@ -3,7 +3,10 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: "http://localhost:3000", // change later for production
+
+
+  baseURL: "https://gpgs-accounts-server.vercel.app", // change later for production
+//   baseURL: "http://localhost:3000", // change later for production
 });
 
 // Function to fetch data from the API
