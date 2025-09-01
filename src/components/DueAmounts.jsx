@@ -10,7 +10,7 @@ const DueAmounts = () => {
   const [rnrSheetData, setRnrSheetData] = useState({})
   console.log("rnrSheetData", rnrSheetData)
   // Fetch all properties
-  const { data: fetchSingleSheetData, error,  isError } = useFetchSingleSheetData();
+  const { data: fetchSingleSheetData, error, isError } = useFetchSingleSheetData();
   // Fetch property sheet data for selected property + month
   const { data: propertySheetData, isLoading, isSuccess } = usePropertySheetData(sheetId, !!sheetId);
 
@@ -18,50 +18,50 @@ const DueAmounts = () => {
   const selectedMonth = watch("selectedMonth");
   const selectedProperty = watch("selectedProperty");
 
-useEffect(() => {
-  if (isSuccess && propertySheetData?.data) {
-    // Build formula string like: "=123 + 456", skipping 0s
-    const buildFormulaString = (values) => {
-      const filtered = values
-        .map(v => Number(v))
-        .filter(v => !isNaN(v) && v > 0);
+  useEffect(() => {
+    if (isSuccess && propertySheetData?.data) {
+      // Build formula string like: "=123 + 456", skipping 0s
+      const buildFormulaString = (values) => {
+        const filtered = values
+          .map(v => Number(v))
+          .filter(v => !isNaN(v) && v > 0);
 
-      return filtered.length > 0 ? `=${filtered.join(" + ")}` : "";
-    };
+        return filtered.length > 0 ? `= ${filtered.join(" + ")}` : "";
+      };
 
-    // Extract names with due > 0, joined by newline
-    const getNamesByDueCondition = (key) =>
-      propertySheetData.data
-        .filter(item => Number(item[key]) > 0)
-        .map(item => item.FullName)
-        .filter(name => name && name.trim() !== "")
-        .join("\n"); // ⬅️ Changed from ", " to "\n"
+      // Extract names with due > 0, joined by newline
+      const getNamesByDueCondition = (key) =>
+        propertySheetData.data
+          .filter(item => Number(item[key]) > 0)
+          .map(item => item.FullName)
+          .filter(name => name && name.trim() !== "")
+          .join("\n"); // ⬅️ Changed from ", " to "\n"
 
-    const ClientNameCurrentDue = getNamesByDueCondition("CurDueAmt");
-    const ClientNameDepositDue = getNamesByDueCondition("DADue");
-    const ClientNamePreviousDue = getNamesByDueCondition("PreDueAmt");
+      const ClientNameCurrentDue = getNamesByDueCondition("CurDueAmt");
+      const ClientNameDepositDue = getNamesByDueCondition("DADue");
+      const ClientNamePreviousDue = getNamesByDueCondition("PreDueAmt");
 
-    // Build formulas
-    const currentDue = buildFormulaString(propertySheetData.data.map(item => item.CurDueAmt));
-    const daDue = buildFormulaString(propertySheetData.data.map(item => item.DADue));
-    const preDue = buildFormulaString(propertySheetData.data.map(item => item.PreDueAmt));
+      // Build formulas
+      const currentDue = buildFormulaString(propertySheetData.data.map(item => item.CurDueAmt));
+      const daDue = buildFormulaString(propertySheetData.data.map(item => item.DADue));
+      const preDue = buildFormulaString(propertySheetData.data.map(item => item.PreDueAmt));
 
-    // Final object
-    const transformed = [
-      {
-        PropertyCode: selectedProperty.label,
-        ClientNameCurrentDue: ClientNameCurrentDue || "None",
-        ClientNameDepositDue: ClientNameDepositDue || "None",
-        ClientNamePreviousDue: ClientNamePreviousDue || "None",
-        CurrentDue: currentDue,
-        DepositDue: daDue,
-        PreviousDue: preDue,
-      }
-    ];
+      // Final object
+      const transformed = [
+        {
+          PropertyCode: selectedProperty.label,
+          ClientNameCurrentDue: ClientNameCurrentDue || "None",
+          ClientNameDepositDue: ClientNameDepositDue || "None",
+          ClientNamePreviousDue: ClientNamePreviousDue || "None",
+          CurrentDue: currentDue,
+          DepositDue: daDue,
+          PreviousDue: preDue,
+        }
+      ];
 
-    setRnrSheetData(transformed);
-  }
-}, [isSuccess, propertySheetData]);
+      setRnrSheetData(transformed);
+    }
+  }, [isSuccess, propertySheetData]);
 
 
   const { mutate: submitBooking, isLoading: isBookingLoading } = useAddBooking();
@@ -109,27 +109,27 @@ useEffect(() => {
     })) || [];
 
 
-// 🔐 Manual short month map to avoid "Sept" issue
-const MONTH_SHORT_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-];
+  // 🔐 Manual short month map to avoid "Sept" issue
+  const MONTH_SHORT_NAMES = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
 
-const today = new Date();
+  const today = new Date();
 
-const monthOptions = Array.from({ length: 2 }, (_, i) => {
-  const baseDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
+  const monthOptions = Array.from({ length: 2 }, (_, i) => {
+    const baseDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
 
-  const year = baseDate.getFullYear();
-  const monthIndex = baseDate.getMonth(); // 0 = Jan, 8 = Sep
-  const shortMonth = MONTH_SHORT_NAMES[monthIndex]; // Always "Sep", never "Sept"
-  const fullMonth = baseDate.toLocaleString("default", { month: "long" }); // e.g., "September"
+    const year = baseDate.getFullYear();
+    const monthIndex = baseDate.getMonth(); // 0 = Jan, 8 = Sep
+    const shortMonth = MONTH_SHORT_NAMES[monthIndex]; // Always "Sep", never "Sept"
+    const fullMonth = baseDate.toLocaleString("default", { month: "long" }); // e.g., "September"
 
-  return {
-    value: `${shortMonth}${year}`,   // ✅ Always "Sep2025"
-    label: `${fullMonth} ${year}`    // e.g., "September 2025"
-  };
-});
+    return {
+      value: `${shortMonth}${year}`,   // ✅ Always "Sep2025"
+      label: `${fullMonth} ${year}`    // e.g., "September 2025"
+    };
+  });
 
 
   // Custom styles
@@ -262,11 +262,21 @@ const monthOptions = Array.from({ length: 2 }, (_, i) => {
                   <div className="border-2 p-2 border-orange-200 ">
                     <div className="mb-2">
                       <span className="font-semibold text-orange-300">Client Names:</span>
-                      <p className="mt-1 text-lg">{rnrSheetData[0].ClientNameCurrentDue}</p>
+                      <div className="mt-1 text-lg max-h-40 overflow-y-auto pr-2">
+                        {rnrSheetData[0].ClientNameCurrentDue
+                          ?.split('\n') // First, try splitting by newline
+                          .map((name, index) => (
+                            <p key={index}>{name.trim()}</p>
+                          ))}
+                      </div>
                     </div>
+
                     <div className="bg-gray-200 p-4 rounded-xl shadow">
+                      <div className="mt-1 text-lg max-h-40 overflow-y-auto pr-2">
+
                       <p className="text-sm text-orange-400">Current Due Amount</p>
                       <p className="text-lg font-semibold">{rnrSheetData[0].CurrentDue || 0}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -274,7 +284,14 @@ const monthOptions = Array.from({ length: 2 }, (_, i) => {
                   <div className="border-2 p-2 border-orange-200">
                     <div className="mb-2">
                       <span className="font-semibold text-orange-500">Client Names:</span>
-                      <p className="mt-1 text-lg">{rnrSheetData[0].ClientNamePreviousDue}</p>
+                        <div className="mt-1 text-lg max-h-40 overflow-y-auto pr-2">
+                        {rnrSheetData[0].ClientNamePreviousDue
+                          ?.split('\n') // First, try splitting by newline
+                          .map((name, index) => (
+                            <p key={index}>{name.trim()}</p>
+                          ))}
+                      </div>
+                      {/* <p className="mt-1 text-lg">{rnrSheetData[0].ClientNamePreviousDue}</p> */}
                     </div>
                     <div className="bg-gray-200 p-4 rounded-xl shadow">
                       <p className="text-sm text-orange-500">Previous Due Amount</p>
@@ -286,7 +303,13 @@ const monthOptions = Array.from({ length: 2 }, (_, i) => {
                   <div className=" border-2 p-2 border-orange-200">
                     <div className="mb-2">
                       <span className="font-semibold text-orange-500">Client Names:</span>
-                      <p className="mt-1 text-lg">{rnrSheetData[0].ClientNameDepositDue}</p>
+                       <div className="mt-1 text-lg max-h-40 overflow-y-auto pr-2">
+                        {rnrSheetData[0].ClientNameDepositDue
+                          ?.split('\n') // First, try splitting by newline
+                          .map((name, index) => (
+                            <p key={index}>{name.trim()}</p>
+                          ))}
+                      </div>
                     </div>
                     <div className="bg-gray-200 p-4 rounded-xl shadow">
                       <p className="text-sm text-orange-500">Deposit Due Amount</p>
@@ -307,8 +330,8 @@ const monthOptions = Array.from({ length: 2 }, (_, i) => {
             disabled={!isSuccess}
             className={`w-full px-4 py-2 ${!isSuccess ? "bg-orange-300" : "bg-orange-500"} text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-orange-400`}
           >
-            { isLoading ? "Loading..." : "Update RNR Sheet"}
-          {/* Update RNR Sheet */}
+            {isLoading ? "Loading..." : "Update RNR Sheet"}
+            {/* Update RNR Sheet */}
           </button>
         </form>
 
