@@ -10,11 +10,10 @@ const DueAmounts = () => {
   const [rnrSheetData, setRnrSheetData] = useState({})
   console.log("rnrSheetData", rnrSheetData)
   // Fetch all properties
-  const { data: fetchSingleSheetData, error, isLoading, isError } = useFetchSingleSheetData();
+  const { data: fetchSingleSheetData, error,  isError } = useFetchSingleSheetData();
   // Fetch property sheet data for selected property + month
-  const { data: propertySheetData, isLoading: propertyLoader, isSuccess } = usePropertySheetData(sheetId, !!sheetId);
+  const { data: propertySheetData, isLoading, isSuccess } = usePropertySheetData(sheetId, !!sheetId);
 
-    console.log("propertyLoader", propertySheetData)
   // Watch form values
   const selectedMonth = watch("selectedMonth");
   const selectedProperty = watch("selectedProperty");
@@ -306,9 +305,9 @@ const monthOptions = Array.from({ length: 2 }, (_, i) => {
           <button
             type="submit"
             disabled={!isSuccess}
-            className={`w-full px-4 py-2 ${!isSuccess ? "bg-orange-200" : "bg-orange-500"} text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-orange-400`}
+            className={`w-full px-4 py-2 ${!isSuccess ? "bg-orange-300" : "bg-orange-500"} text-white rounded-lg transition focus:outline-none focus:ring-2 focus:ring-orange-400`}
           >
-            { propertySheetData ? "Loading ...." : "Update RNR Sheet"}
+            { isLoading ? "Loading..." : "Update RNR Sheet"}
           {/* Update RNR Sheet */}
           </button>
         </form>
